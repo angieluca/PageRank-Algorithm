@@ -1,5 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
-#include <iostream>
+#include "adjList.h"
 
 using namespace std;
 
@@ -7,7 +7,7 @@ using namespace std;
 // unique, but you can group multiple tests with [tags]. A test can have
 // [multiple][tags] using that syntax.
 
-TEST_CASE("Test 1 - Only one website", "[tag]") {
+TEST_CASE("Test 1 - Only one website inserted") {
     string input = R"(4 2
 google.com google.com
 google.com google.com
@@ -17,6 +17,27 @@ google.com google.com)";
     string expectedOutput = "google.com 1.00";
 
     string actualOutput;
+    std::map<std::string, std::set<std::string>> adjMap; //Adjacency List
+    std::map<std::string, float> tempRanks; //temporarily keep values during one iteration
+    std::map<std::string, float> ranks; //official ranks
+    float pageRank;
+    int numLines, powerItr;
+    std::string fromPage, toPage;
+    std::cin >> numLines;
+    std::cin >> powerItr;
+
+    createAdjList(numLines, adjMap);
+    //visualizeList(adjMap); //for debugging purposes
+
+    //Default page rank of each is 1/(number of websites); remains when power iterator is 1
+    pageRank = (float)1/adjMap.size();
+    //Everything first has default ranks
+    ranks = createDefRanks(adjMap, pageRank);
+    //Calculate new ranks if powerItr > 1
+    if (powerItr > 1) calculateRanks(adjMap, ranks, tempRanks, powerItr);
+
+    std::string output = printRanks(ranks); //Print each website and their ranks
+
     REQUIRE (expectedOutput == actualOutput);
 
 
