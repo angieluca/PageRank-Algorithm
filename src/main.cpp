@@ -6,7 +6,6 @@ int main() {
     std::map<std::string, float> ranks; //official ranks
     float pageRank;
     int numLines, powerItr;
-    std::string fromPage, toPage;
     std::cin >> numLines;
     std::cin >> powerItr;
 
@@ -14,7 +13,7 @@ int main() {
     adjList graph;
 
     graph.createAdjList(numLines, adjMap);
-    graph.visualizeList(adjMap); //for debugging purposes
+    //graph.visualizeList(adjMap); //for debugging purposes
 
     //Default page rank of each is 1/(number of websites); remains when power iterator is 1
     pageRank = (float)1/adjMap.size();

@@ -1,6 +1,5 @@
 #include "adjList.h"
 
-
 void adjList::createAdjList(int &numLines, std::map<std::string, std::set<std::string>> &adjMap){
     std::string fromPage, toPage;
     //Get user input of website
@@ -68,7 +67,9 @@ std::string adjList::printRanks(std::map<std::string, float> &ranks){
     //Print out each website and rank
     for (const auto &website: ranks){
         std::cout << website.first << " " << std::fixed << std::setprecision(2) << website.second << std::endl;
-        output += website.first + " " + std::to_string(website.second) + "\n";
+        std::ostringstream outputss;
+        outputss << std::fixed << std::setprecision(2) << website.second;
+        output += website.first + " " + outputss.str() + "\n";
     }
     return output;
 }

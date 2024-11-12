@@ -3,6 +3,7 @@
 #include <set>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 struct adjList{
     void createAdjList(int &numLines, std::map<std::string, std::set<std::string>> &adjMap);

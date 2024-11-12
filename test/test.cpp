@@ -3,10 +3,6 @@
 
 using namespace std;
 
-// the syntax for defining a test is below. It is important for the name to be
-// unique, but you can group multiple tests with [tags]. A test can have
-// [multiple][tags] using that syntax.
-
 TEST_CASE("Test 1 - Only one website inserted") {
     string input = R"(4 2
 google.com google.com
@@ -14,85 +10,266 @@ google.com google.com
 google.com google.com
 google.com google.com)";
 
-    string expectedOutput = "google.com 1.00";
+    string expectedOutput = "google.com 1.00\n";
 
-    string actualOutput;
+    //Same as main file:
     std::map<std::string, std::set<std::string>> adjMap; //Adjacency List
     std::map<std::string, float> tempRanks; //temporarily keep values during one iteration
     std::map<std::string, float> ranks; //official ranks
     float pageRank;
-    int numLines, powerItr;
+    int numLines = 4;
+    int powerItr = 2;
+
+    //Create adjacent List object and use class functions
+    adjList graph;
     std::string fromPage, toPage;
-    std::cin >> numLines;
-    std::cin >> powerItr;
-
-    createAdjList(numLines, adjMap);
-    //visualizeList(adjMap); //for debugging purposes
-
-    //Default page rank of each is 1/(number of websites); remains when power iterator is 1
+    //Get user input of website (not calling function cuz don't want to use cin in test case)
+    for (int i = 0; i < numLines; i++) {
+        fromPage = "google.com";
+        if (adjMap.find(fromPage) == adjMap.end()){
+            adjMap[fromPage] = std::set<std::string>(); //Insert "from" website with empty vector
+        }
+        toPage = "google.com";
+        if (adjMap.find(toPage) == adjMap.end()) {
+            adjMap[toPage] = std::set<std::string>(); //Insert "to" website with empty vector
+        }
+        if (adjMap[fromPage].count(toPage) == 0){ //Check if website already in set
+            adjMap[fromPage].emplace(toPage);
+        }
+    }
     pageRank = (float)1/adjMap.size();
-    //Everything first has default ranks
-    ranks = createDefRanks(adjMap, pageRank);
-    //Calculate new ranks if powerItr > 1
-    if (powerItr > 1) calculateRanks(adjMap, ranks, tempRanks, powerItr);
-
-    std::string output = printRanks(ranks); //Print each website and their ranks
+    ranks = graph.createDefRanks(adjMap, pageRank);
+    if (powerItr > 1) graph.calculateRanks(adjMap, ranks, tempRanks, powerItr);
+    std::string actualOutput = graph.printRanks(ranks); //Print each website and their ranks
 
     REQUIRE (expectedOutput == actualOutput);
-
-
 }
 
-TEST_CASE("Test 2", "[tag]") {
-  // you can also use "sections" to share setup code between tests, for example:
-  int one = 1;
+TEST_CASE("Test 2 - Check self loops") {
+    string input = R"(2 1
+google.com ufl.com
+google.com google.com)";
 
-  SECTION("num is 2") {
-    int num = one + 1;
-    REQUIRE(num == 2);
-  };
+    string expectedOutput = "google.com 0.50\nufl.com 0.50\n";
 
-  SECTION("num is 3") {
-    int num = one + 2;
-    REQUIRE(num == 3);
-  };
+    //Same as main file:
+    std::map<std::string, std::set<std::string>> adjMap; //Adjacency List
+    std::map<std::string, float> tempRanks; //temporarily keep values during one iteration
+    std::map<std::string, float> ranks; //official ranks
+    float pageRank;
+    int powerItr = 1;
 
-  // each section runs the setup code independently to ensure that they don't
-  // affect each other
+    //Create adjacent List object and use class functions
+    adjList graph;
+    std::string fromPage, toPage;
+    //Get user input of website (not calling function cuz don't want to use cin in test case)
+    fromPage = "google.com";
+    if (adjMap.find(fromPage) == adjMap.end()){
+        adjMap[fromPage] = std::set<std::string>(); //Insert "from" website with empty vector
+    }
+    toPage = "ufl.com";
+    if (adjMap.find(toPage) == adjMap.end()) {
+        adjMap[toPage] = std::set<std::string>(); //Insert "to" website with empty vector
+    }
+    if (adjMap[fromPage].count(toPage) == 0){ //Check if website already in set
+        adjMap[fromPage].emplace(toPage);
+    }
+    fromPage = "google.com";
+    if (adjMap.find(fromPage) == adjMap.end()){
+        adjMap[fromPage] = std::set<std::string>(); //Insert "from" website with empty vector
+    }
+    toPage = "google.com";
+    if (adjMap.find(toPage) == adjMap.end()) {
+        adjMap[toPage] = std::set<std::string>(); //Insert "to" website with empty vector
+    }
+    if (adjMap[fromPage].count(toPage) == 0){ //Check if website already in set
+        adjMap[fromPage].emplace(toPage);
+    }
+    pageRank = (float)1/adjMap.size();
+    ranks = graph.createDefRanks(adjMap, pageRank);
+    if (powerItr > 1) graph.calculateRanks(adjMap, ranks, tempRanks, powerItr);
+    std::string actualOutput = graph.printRanks(ranks); //Print each website and their ranks
+
+    REQUIRE (expectedOutput == actualOutput);
 }
 
-// You must write 5 unique, meaningful tests for credit on the testing section
-// of this project!
+TEST_CASE("Test 3 - Duplicates of same lines") {
+    //Duplicates shouldn't matter
+    string input = R"(3 2
+maps.com ufl.com
+google.com google.com
+maps.com ufl.com)";
 
-// See the following for an example of how to easily test your output.
-// This uses C++ "raw strings" and assumes your PageRank outputs a string with
-//   the same thing you print.
-TEST_CASE("Example PageRank Output Test", "[flag]") {
-  // the following is a "raw string" - you can write the exact input (without
-  //   any indentation!) and it should work as expected
-  string input = R"(7 2
+    string expectedOutput = "google.com 0.33\n"
+                            "maps.com 0.00\n"
+                            "ufl.com 0.33\n";
+
+    //Same as main file:
+    std::map<std::string, std::set<std::string>> adjMap; //Adjacency List
+    std::map<std::string, float> tempRanks; //temporarily keep values during one iteration
+    std::map<std::string, float> ranks; //official ranks
+    float pageRank;
+    int powerItr = 2;
+
+    //Create adjacent List object and use class functions
+    adjList graph;
+    std::string fromPage, toPage;
+    //Get user input of website (not calling function cuz don't want to use cin in test case)
+    fromPage = "maps.com";
+    if (adjMap.find(fromPage) == adjMap.end()){
+        adjMap[fromPage] = std::set<std::string>(); //Insert "from" website with empty vector
+    }
+    toPage = "ufl.com";
+    if (adjMap.find(toPage) == adjMap.end()) {
+        adjMap[toPage] = std::set<std::string>(); //Insert "to" website with empty vector
+    }
+    if (adjMap[fromPage].count(toPage) == 0){ //Check if website already in set
+        adjMap[fromPage].emplace(toPage);
+    }
+    fromPage = "google.com";
+    if (adjMap.find(fromPage) == adjMap.end()){
+        adjMap[fromPage] = std::set<std::string>(); //Insert "from" website with empty vector
+    }
+    toPage = "google.com";
+    if (adjMap.find(toPage) == adjMap.end()) {
+        adjMap[toPage] = std::set<std::string>(); //Insert "to" website with empty vector
+    }
+    if (adjMap[fromPage].count(toPage) == 0){ //Check if website already in set
+        adjMap[fromPage].emplace(toPage);
+    }
+    fromPage = "maps.com";
+    if (adjMap.find(fromPage) == adjMap.end()){
+        adjMap[fromPage] = std::set<std::string>(); //Insert "from" website with empty vector
+    }
+    toPage = "ufl.com";
+    if (adjMap.find(toPage) == adjMap.end()) {
+        adjMap[toPage] = std::set<std::string>(); //Insert "to" website with empty vector
+    }
+    if (adjMap[fromPage].count(toPage) == 0){ //Check if website already in set
+        adjMap[fromPage].emplace(toPage);
+    }
+
+    pageRank = (float)1/adjMap.size();
+    ranks = graph.createDefRanks(adjMap, pageRank);
+    if (powerItr > 1) graph.calculateRanks(adjMap, ranks, tempRanks, powerItr);
+    std::string actualOutput = graph.printRanks(ranks); //Print each website and their ranks
+
+    REQUIRE (expectedOutput == actualOutput);
+}
+
+TEST_CASE("Test 4 - All ranks should be zero with large iterator") {
+    //Duplicates shouldn't matter
+    string input = R"(2 20
+maps.com ufl.com
+ufl.com google.com)";
+
+    string expectedOutput = "google.com 0.00\n"
+                            "maps.com 0.00\n"
+                            "ufl.com 0.00\n";
+
+    //Same as main file:
+    std::map<std::string, std::set<std::string>> adjMap; //Adjacency List
+    std::map<std::string, float> tempRanks; //temporarily keep values during one iteration
+    std::map<std::string, float> ranks; //official ranks
+    float pageRank;
+    int powerItr = 20;
+
+    //Create adjacent List object and use class functions
+    adjList graph;
+    std::string fromPage, toPage;
+    //Get user input of website (not calling function cuz don't want to use cin in test case)
+    fromPage = "maps.com";
+    if (adjMap.find(fromPage) == adjMap.end()){
+        adjMap[fromPage] = std::set<std::string>(); //Insert "from" website with empty vector
+    }
+    toPage = "ufl.com";
+    if (adjMap.find(toPage) == adjMap.end()) {
+        adjMap[toPage] = std::set<std::string>(); //Insert "to" website with empty vector
+    }
+    if (adjMap[fromPage].count(toPage) == 0){ //Check if website already in set
+        adjMap[fromPage].emplace(toPage);
+    }
+    fromPage = "ufl.com";
+    if (adjMap.find(fromPage) == adjMap.end()){
+        adjMap[fromPage] = std::set<std::string>(); //Insert "from" website with empty vector
+    }
+    toPage = "google.com";
+    if (adjMap.find(toPage) == adjMap.end()) {
+        adjMap[toPage] = std::set<std::string>(); //Insert "to" website with empty vector
+    }
+    if (adjMap[fromPage].count(toPage) == 0){ //Check if website already in set
+        adjMap[fromPage].emplace(toPage);
+    }
+
+    pageRank = (float)1/adjMap.size();
+    ranks = graph.createDefRanks(adjMap, pageRank);
+    if (powerItr > 1) graph.calculateRanks(adjMap, ranks, tempRanks, powerItr);
+    std::string actualOutput = graph.printRanks(ranks); //Print each website and their ranks
+
+    REQUIRE (expectedOutput == actualOutput);
+}
+
+TEST_CASE("Test 5 - Confirm rounding works well") {
+    //Should properly round to 0.33 (1/3)
+    string input = R"(3 1
 google.com gmail.com
 google.com maps.com
-facebook.com ufl.edu
-ufl.edu google.com
-ufl.edu gmail.com
-maps.com facebook.com
-gmail.com maps.com)";
-
-  string expectedOutput = R"(facebook.com 0.20
-gmail.com 0.20
-google.com 0.10
-maps.com 0.30
-ufl.edu 0.20
+maps.com google.com
 )";
 
-  string actualOutput;
+    string expectedOutput = "gmail.com 0.33\n"
+                            "google.com 0.33\n"
+                            "maps.com 0.33\n";
 
-  // somehow pass your input into your AdjacencyList and parse it to call the
-  // correct functions, for example:
-  //  AdjacencyList g;
-  //  g.parseInput(input)
-  //  actualOutput = g.getStringRepresentation()
+    //Same as main file:
+    std::map<std::string, std::set<std::string>> adjMap; //Adjacency List
+    std::map<std::string, float> tempRanks; //temporarily keep values during one iteration
+    std::map<std::string, float> ranks; //official ranks
+    float pageRank;
+    int powerItr = 1;
 
-  REQUIRE(actualOutput == expectedOutput);
+    //Create adjacent List object and use class functions
+    adjList graph;
+    std::string fromPage, toPage;
+    //Get user input of website (not calling function cuz don't want to use cin in test case)
+    fromPage = "google.com";
+    if (adjMap.find(fromPage) == adjMap.end()){
+        adjMap[fromPage] = std::set<std::string>(); //Insert "from" website with empty vector
+    }
+    toPage = "gmail.com";
+    if (adjMap.find(toPage) == adjMap.end()) {
+        adjMap[toPage] = std::set<std::string>(); //Insert "to" website with empty vector
+    }
+    if (adjMap[fromPage].count(toPage) == 0){ //Check if website already in set
+        adjMap[fromPage].emplace(toPage);
+    }
+    fromPage = "google.com";
+    if (adjMap.find(fromPage) == adjMap.end()){
+        adjMap[fromPage] = std::set<std::string>(); //Insert "from" website with empty vector
+    }
+    toPage = "maps.com";
+    if (adjMap.find(toPage) == adjMap.end()) {
+        adjMap[toPage] = std::set<std::string>(); //Insert "to" website with empty vector
+    }
+    if (adjMap[fromPage].count(toPage) == 0){ //Check if website already in set
+        adjMap[fromPage].emplace(toPage);
+    }
+    fromPage = "maps.com";
+    if (adjMap.find(fromPage) == adjMap.end()){
+        adjMap[fromPage] = std::set<std::string>(); //Insert "from" website with empty vector
+    }
+    toPage = "google.com";
+    if (adjMap.find(toPage) == adjMap.end()) {
+        adjMap[toPage] = std::set<std::string>(); //Insert "to" website with empty vector
+    }
+    if (adjMap[fromPage].count(toPage) == 0){ //Check if website already in set
+        adjMap[fromPage].emplace(toPage);
+    }
+
+    pageRank = (float)1/adjMap.size();
+    ranks = graph.createDefRanks(adjMap, pageRank);
+    if (powerItr > 1) graph.calculateRanks(adjMap, ranks, tempRanks, powerItr);
+    std::string actualOutput = graph.printRanks(ranks); //Print each website and their ranks
+
+    REQUIRE (expectedOutput == actualOutput);
 }
